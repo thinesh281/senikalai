@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MINI AP · NASRe PSV — Asas Seni Reka</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@500;600;700;800&family=Catamaran:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FCF8F1;
+    --paper-2:#F6EFE2;
+    --ink:#2C2540;
+    --ink-soft:#6E6780;
+    --line:#3B5BDB;   /* Garisan  */
+    --shape:#F08C00;  /* Rupa     */
+    --form:#0CA678;   /* Bentuk   */
+    --colour:#E8590C; /* Warna    */
+    --texture:#9C36B5;/* Jalinan  */
+    --space:#E64980;  /* Ruang    */
+    --sun:#FFD43B;
+    --card:#FFFFFF;
+    --shadow:0 10px 30px rgba(44,37,64,.10);
+    --shadow-hover:0 18px 44px rgba(44,37,64,.18);
+    --radius:22px;
+    --maxw:1080px;
+    /* per-section theme, set by JS */
+    --theme:var(--colour);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Catamaran",system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.5;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:"Baloo Thambi 2",system-ui,sans-serif;line-height:1.15;margin:0}
+  a{color:inherit}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  :focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:8px}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(252,248,241,.86);
+    backdrop-filter:blur(10px);
+    border-bottom:2px solid var(--paper-2);
+  }
+  .bar{max-width:var(--maxw);margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
+  .brand{display:flex;align-items:center;gap:11px;cursor:pointer;background:none;padding:4px;border-radius:14px}
+  .blob{width:42px;height:42px;flex:none;border-radius:46% 54% 58% 42% / 52% 44% 56% 48%;
+    background:conic-gradient(from 20deg,var(--colour),var(--shape),var(--form),var(--line),var(--texture),var(--space),var(--colour));
+    display:grid;place-items:center;color:#fff;font-family:"Baloo Thambi 2";font-weight:800;font-size:20px;
+    box-shadow:inset 0 -4px 8px rgba(0,0,0,.15)}
+  .brand-txt{display:flex;flex-direction:column;line-height:1}
+  .brand-txt b{font-family:"Baloo Thambi 2";font-weight:800;font-size:18px;letter-spacing:.2px}
+  .brand-txt span{font-size:11px;color:var(--ink-soft);font-weight:600;letter-spacing:.4px}
+  .spacer{flex:1}
+
+  /* language toggle */
+  .lang{display:flex;background:var(--paper-2);border-radius:999px;padding:4px;gap:2px;position:relative}
+  .lang button{padding:7px 14px;border-radius:999px;font-family:"Baloo Thambi 2";font-weight:600;font-size:14px;color:var(--ink-soft);z-index:1;transition:color .25s}
+  .lang button.on{color:#fff}
+  .lang .knob{position:absolute;top:4px;bottom:4px;border-radius:999px;background:var(--ink);transition:transform .3s cubic-bezier(.34,1.56,.64,1),width .3s;z-index:0}
+
+  /* ---------- Layout ---------- */
+  main{max-width:var(--maxw);margin:0 auto;padding:0 18px 90px}
+  .view{animation:fade .4s ease both}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* ---------- Hero / Home ---------- */
+  .hero{position:relative;text-align:center;padding:46px 12px 30px;overflow:hidden}
+  .hero h1{font-size:clamp(34px,7vw,60px);font-weight:800;letter-spacing:-.5px}
+  .hero h1 .pop{color:var(--colour)}
+  .hero .tag{font-size:clamp(16px,2.6vw,20px);color:var(--ink-soft);font-weight:600;margin-top:12px;max-width:560px;margin-left:auto;margin-right:auto}
+  .paint{position:absolute;border-radius:50%;filter:blur(6px);opacity:.5;z-index:-1;animation:float 9s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+  .feat{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px}
+  .chip{background:var(--card);border:2px solid var(--paper-2);border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;box-shadow:var(--shadow);display:flex;gap:7px;align-items:center}
+
+  /* section grid */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:34px}
+  .tile{position:relative;text-align:left;background:var(--card);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);
+    border:2px solid transparent;transition:transform .2s,box-shadow .2s,border-color .2s;overflow:hidden}
+  .tile:hover,.tile:focus-visible{transform:translateY(-6px);box-shadow:var(--shadow-hover);border-color:var(--tc)}
+  .tile .ico{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;color:#fff;margin-bottom:14px;
+    background:var(--tc);box-shadow:0 8px 18px color-mix(in srgb,var(--tc) 40%,transparent);transition:transform .3s}
+  .tile:hover .ico{transform:rotate(-8deg) scale(1.06)}
+  .tile h3{font-size:22px;font-weight:700}
+  .tile p{margin:6px 0 0;color:var(--ink-soft);font-size:14.5px;font-weight:500}
+  .tile .count{position:absolute;top:18px;right:18px;background:var(--paper-2);color:var(--ink-soft);font-family:"Baloo Thambi 2";font-weight:700;font-size:13px;padding:4px 11px;border-radius:999px}
+  .tile .swash{position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;border-radius:50%;background:var(--tc);opacity:.08;transition:transform .3s}
+  .tile:hover .swash{transform:scale(1.4)}
+
+  /* ---------- Section pages ---------- */
+  .back{display:inline-flex;align-items:center;gap:8px;margin:26px 0 8px;background:var(--card);
+    border:2px solid var(--paper-2);border-radius:999px;padding:9px 16px;font-weight:700;font-family:"Baloo Thambi 2";font-size:15px;box-shadow:var(--shadow)}
+  .back:hover{transform:translateX(-3px)}
+  .sec-head{display:flex;align-items:center;gap:16px;margin:14px 0 6px}
+  .sec-head .ico{width:60px;height:60px;border-radius:20px;display:grid;place-items:center;color:#fff;background:var(--theme);flex:none;box-shadow:0 10px 22px color-mix(in srgb,var(--theme) 40%,transparent)}
+  .sec-head h2{font-size:clamp(26px,5vw,38px);font-weight:800}
+  .sec-head .sub{color:var(--ink-soft);font-weight:600;font-size:15px;margin-top:2px}
+  .brush{height:8px;width:120px;border-radius:6px;background:var(--theme);margin:4px 0 26px;
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='8'%3E%3Cpath d='M2 5 Q30 1 60 4 T118 3' stroke='black' stroke-width='7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat;mask-size:contain}
+
+  /* accordion card (Bidang / Prinsip / Unsur) */
+  .acc{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden;border-left:7px solid var(--ac,var(--theme))}
+  .acc>button{width:100%;display:flex;align-items:center;gap:14px;padding:18px 20px;text-align:left}
+  .acc .num{width:40px;height:40px;flex:none;border-radius:12px;background:var(--ac,var(--theme));color:#fff;display:grid;place-items:center;font-family:"Baloo Thambi 2";font-weight:800;font-size:18px}
+  .acc .ttl{flex:1}
+  .acc .ttl b{font-family:"Baloo Thambi 2";font-weight:700;font-size:19px;display:block}
+  .acc .ttl small{color:var(--ink-soft);font-weight:600;font-size:13.5px}
+  .acc .arw{transition:transform .3s;color:var(--ink-soft);flex:none}
+  .acc.open .arw{transform:rotate(180deg)}
+  .acc .body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+  .acc .body-in{padding:0 20px 20px 20px}
+  .acc .desc{color:var(--ink);font-size:15px;font-weight:500;margin:0 0 12px;background:var(--paper);padding:12px 14px;border-radius:14px}
+  .tags{display:flex;flex-wrap:wrap;gap:9px}
+  .tag{background:var(--paper-2);border-radius:12px;padding:8px 13px;font-weight:600;font-size:13.5px;line-height:1.25;display:flex;flex-direction:column;transition:transform .15s,background .15s}
+  .tag:hover{transform:translateY(-2px)}
+  .tag small{font-size:11.5px;color:var(--ink-soft);font-weight:600}
+
+  /* Teknik year tabs */
+  .years{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+  .year{padding:11px 18px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-family:"Baloo Thambi 2";font-weight:700;font-size:15px;border:2px solid transparent;transition:.18s}
+  .year.on{background:var(--theme);color:#fff;border-color:var(--theme)}
+  .year:not(.on):hover{transform:translateY(-3px)}
+  .field{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:14px;border-top:6px solid var(--fc)}
+  .field h4{font-family:"Baloo Thambi 2";font-weight:700;font-size:17px;display:flex;align-items:center;gap:10px;margin:0 0 4px}
+  .field h4 .dot{width:26px;height:26px;border-radius:8px;background:var(--fc);color:#fff;display:grid;place-items:center;font-size:13px;flex:none}
+  .field .fsub{color:var(--ink-soft);font-weight:600;font-size:13px;margin:0 0 12px}
+
+  /* original notes link */
+  .notes{display:inline-flex;align-items:center;gap:8px;margin-top:8px;color:var(--theme);font-weight:700;font-size:14px;text-decoration:none}
+  .notes:hover{text-decoration:underline}
+
+  footer{max-width:var(--maxw);margin:0 auto;padding:24px 18px;color:var(--ink-soft);font-size:13px;text-align:center}
+
+  @media(max-width:560px){
+    .brand-txt span{display:none}
+    .grid{grid-template-columns:1fr;gap:13px}
+    .bar{padding:10px 14px}
+    main{padding:0 14px 80px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <button class="brand" onclick="go('home')" aria-label="Home">
+      <span class="blob">சி</span>
+      <span class="brand-txt"><b>MINI AP · NASRe</b><span>Aplikasi Nota Asas Seni Reka · PSV</span></span>
+    </button>
+    <span class="spacer"></span>
+    <div class="lang" role="group" aria-label="Language">
+      <span class="knob" id="knob"></span>
+      <button id="btn-ta" class="on" onclick="setLang('ta')">தமிழ்</button>
+      <button id="btn-ms" onclick="setLang('ms')">Melayu</button>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer id="foot"></footer>
+
+<script>
+/* ============================================================
+   MINI AP · NASRe PSV  — bilingual (ta / ms) learning site
+   Content data-driven. Edit the DATA object to update content.
+   ============================================================ */
+
+/* ---- UI strings ---- */
+const UI = {
+  hero_title:{ta:["காட்சிக் ","கலையை"," மகிழ்ச்சியாகக் கற்போம்!"], ms:["Belajar ","Seni Reka"," dengan seronok!"]},
+  hero_tag:{ta:"தொடக்கப்பள்ளி மாணவர்களுக்கான காட்சிக் கலை மொழி — எங்கும், எப்போதும் எளிதாகக் கற்கலாம்.",
+            ms:"Bahasa seni visual untuk murid sekolah rendah — belajar di mana-mana, bila-bila, dengan mudah."},
+  feats:{ta:["🎨 எளிதான அணுகல்","✨ கவர்ச்சிகரமான","🖼️ காட்சி வழி","📚 எங்கும் கற்கலாம்"],
+         ms:["🎨 Mudah akses","✨ Menarik","🖼️ Visual","📚 Belajar di mana jua"]},
+  back:{ta:"பின்செல்","ms:":"Kembali"},
+  notes:{ta:"மூல குறிப்புகளைப் பார்க்க (PDF)","ms:":"Lihat nota asal (PDF)"},
+  year:{ta:"ஆண்டு","ms:":"Tahun"},
+  foot:{ta:"MINI AP · NASRe — காட்சிக் கலை (PSV) அடிப்படை வடிவமைப்பு குறிப்புகள் · தமிழ் & மலாய்",
+        ms:"MINI AP · NASRe — Nota Asas Seni Reka Pendidikan Seni Visual · Tamil & Melayu"}
+};
+/* fix accidental keys */
+UI.back={ta:"பின்செல்",ms:"Kembali"};
+UI.notes={ta:"மூல குறிப்புகளைப் பார்க்க (PDF)",ms:"Lihat nota asal (PDF)"};
+UI.year={ta:"ஆண்டு",ms:"Tahun"};
+UI.foot={ta:"MINI AP · NASRe — காட்சிக் கலை (PSV) அடிப்படை வடிவமைப்பு குறிப்புகள் · தமிழ் & மலாய்",
+         ms:"MINI AP · NASRe — Nota Asas Seni Reka Pendidikan Seni Visual · Tamil & Melayu"};
+
+/* helper: bilingual term -> chip object */
+function T(ms,ta){return {ms,ta};}
+
+/* technique dictionary reused across Bidang & Teknik */
+const TECH = {
+  lukisan:T("Lukisan","புனையா ஓவியம்"), catan:T("Catan","ஓவியம்"), capan:T("Capan","பதித்தல்"),
+  kolaj:T("Kolaj","சேர்ப்பு ஒட்டுப்படம்"), montaj:T("Montaj","மொந்தாஜ்"), mozek:T("Mozek","துண்டு ஒட்டுப்படம்"),
+  poster:T("Poster","சுவரொட்டி"), stensilan:T("Stensilan","அச்சுப்படி உருவாக்கம்"), gosokan:T("Gosokan","தேய்த்தல்"),
+  gurisan:T("Gurisan","கீறல் கலை"), resis:T("Resis","மெழுகுக் கலை"), cetakan:T("Cetakan","அச்சிடுதல்"),
+  renjisan:T("Renjisan & Percikan","தெளித்தலும் தெரித்தலும்"),
+  lipatan:T("Lipatan & Guntingan","மடித்தலும் வெட்டுதலும்"), ikatan:T("Ikatan & Celupan","கட்டுதலும் நனைத்தலும்"),
+  tiupan:T("Tiupan","ஊதுதல்"), pualaman:T("Pualaman","புவலாமன்"), kaligrafi:T("Kaligrafi","கலையெழுத்து"),
+  titisan:T("Titisan","சொட்டுதல் கலை"), corakT:T("Corak Terancang","திட்டமிட்ட கோலம்"),
+  corakTT:T("Corak Tidak Terancang","திட்டமிடாத கோலம்"),
+  arca:T("Arca","சிற்பம்"), mobail:T("Mobail","தொங்காடி"), stabail:T("Stabail","நிலை வடிவப் பொருள்"),
+  topeng:T("Topeng","முகமூடி"), asemblaj:T("Asemblaj","பொருத்துதல்"), boneka:T("Boneka","பொம்மை"),
+  model:T("Model","உருவப்படிவம்"), diorama:T("Diorama","கதை சொல்லும் கலை"), origami:T("Origami","ஒரிகாமி"),
+  batik:T("Batik","பாத்தேக்"), tekat:T("Tekat","நூல் கலை"), tembikar:T("Tembikar","மண்பாண்டம்"),
+  anyaman:T("Anyaman","முடைதல்"), tenunan:T("Tenunan","நெய்தல் கலை"), ukiran:T("Ukiran","செதுக்குதல்"),
+  perhiasan:T("Perhiasan Diri","அலங்காரக் கலை"), domestik:T("Alat Domestik","பயன்பாட்டுக் கருவி"),
+  permainan:T("Alat Permainan","விளையாட்டுப் பொருள்"), pertahanan:T("Alat Pertahanan Diri","தற்காப்புக் கருவி")
+};
+
+/* ---- SECTION DATA ---- */
+const SECTIONS = {
+  bidang:{
+    theme:"var(--colour)", icon:"🖼️",
+    ttl:T("Bidang","துறை"),
+    sub:T("4 bidang Seni Visual","காட்சிக் கலையின் 4 துறைகள்"),
+    note:"https://drive.google.com/file/d/1lm7o8DXU7AFHFLAN3v8jQGhF_t0p6yG1/view",
+    kind:"acc",
+    items:[
+      {c:"var(--colour)", t:T("Menggambar","படம் உருவாக்கம்"), s:T("Bidang 1","துறை 1"),
+       tags:[TECH.lukisan,TECH.catan,TECH.capan,TECH.kolaj,TECH.montaj,TECH.mozek,TECH.poster,TECH.gosokan,TECH.gurisan,TECH.resis,TECH.cetakan,TECH.renjisan]},
+      {c:"var(--shape)", t:T("Membuat Corak dan Rekaan","கோலம் உருவாக்கம்"), s:T("Bidang 2","துறை 2"),
+       tags:[TECH.corakT,TECH.corakTT,TECH.lipatan,TECH.ikatan,TECH.tiupan,TECH.pualaman,TECH.kaligrafi,TECH.titisan,TECH.capan,TECH.cetakan]},
+      {c:"var(--form)", t:T("Membentuk dan Membuat Binaan","உருவமைத்தலும் கட்டுதலும்"), s:T("Bidang 3","துறை 3"),
+       tags:[TECH.arca,TECH.mobail,TECH.stabail,TECH.topeng,TECH.asemblaj,TECH.boneka,TECH.model,TECH.diorama,TECH.origami]},
+      {c:"var(--texture)", t:T("Mengenal Kraf Tradisional","பாரம்பரிய கைவினை"), s:T("Bidang 4","துறை 4"),
+       tags:[TECH.batik,TECH.tekat,TECH.tembikar,TECH.anyaman,TECH.tenunan,TECH.ukiran,TECH.perhiasan,TECH.domestik,TECH.permainan,TECH.pertahanan]}
+    ]
+  },
+
+  unsur:{
+    theme:"var(--line)", icon:"🎨",
+    ttl:T("Unsur Seni","கலைக்கூறு"),
+    sub:T("6 unsur asas seni reka","கலையின் 6 அடிப்படைக் கூறுகள்"),
+    note:"https://drive.google.com/file/d/1BmWXn1J8P_ELdGQI3-SSWGtJNs0Ibjbe/view",
+    kind:"acc",
+    items:[
+      {c:"var(--line)", t:T("Garisan","கோடுகள்"),
+       d:T("Titik yang bergerak akan membentuk garisan. Terdapat pelbagai jenis garisan.",
+           "புள்ளி நகர்ந்து கோடாக மாறுகிறது. பலவகைக் கோடுகள் உண்டு."),
+       tags:[T("Tebal","தடித்த"),T("Halus","மெலிந்த"),T("Putus-putus","விடுபட்ட"),T("Bintik","புள்ளி"),T("Silang","குறுக்கு"),T("Berpusar","சுருள்"),T("Zig-zag","கிறுக்கல்"),T("Beralun","அலை"),T("Tajam","கூர்மை"),T("Condong","சாய்வு")]},
+      {c:"var(--shape)", t:T("Rupa","வடிவம் (2D)"),
+       d:T("Bentuk rata dua dimensi seperti bulatan dan segi empat.","வட்டம், சதுரம் போன்ற தட்டையான இருபரிமாண வடிவம்."),
+       tags:[T("Geometri","கணித வடிவம்"),T("Organik","உயிரின வடிவம்")]},
+      {c:"var(--form)", t:T("Bentuk","உருவம் (3D)"),
+       d:T("Objek tiga dimensi yang mempunyai isi padu dan boleh dipegang.","கனமுள்ள, பிடிக்கக்கூடிய முப்பரிமாண உருவம்."),
+       tags:[T("Padu","திட உருவம்"),T("Berongga","திடமற்ற உருவம்"),T("Organik","உயிர்ம வடிவம்")]},
+      {c:"var(--colour)", t:T("Warna","வண்ணம்"),
+       d:T("Warna menghidupkan karya — warna asas, sekunder dan tertier.","வண்ணம் படைப்பை உயிர்ப்பிக்கிறது — முதல், இரண்டாம், மூன்றாம் நிலை."),
+       tags:[T("Warna Asas / Primer","முதல் நிலை வண்ணம்"),T("Sekunder","இரண்டாம் நிலை வண்ணம்"),T("Tertier","மூன்றாம் நிலை வண்ணம்")]},
+      {c:"var(--texture)", t:T("Jalinan","மேல்தள வடிவமைப்பு"),
+       d:T("Kesan permukaan yang boleh dilihat atau disentuh — kasar atau licin.","பார்க்கவோ தொடவோ கூடிய மேற்பரப்பு உணர்வு — கரடு அல்லது வழுவழுப்பு."),
+       tags:[T("Tampak / Visual","கண்டுணரும்"),T("Sentuh / Taktil","தொட்டுணரும்")]},
+      {c:"var(--space)", t:T("Ruang","இடைவெளி"),
+       d:T("Kawasan kosong di sekeliling atau di dalam sesuatu objek.","ஒரு பொருளைச் சுற்றி அல்லது உள்ளே உள்ள வெற்று இடம்."),
+       tags:[T("Ruang Positif","நேர் இடைவெளி"),T("Ruang Negatif","எதிர் இடைவெளி")]}
+    ]
+  },
+
+  prinsip:{
+    theme:"var(--form)", icon:"⚖️",
+    ttl:T("Prinsip Rekaan","உருவாக்கக் கோட்பாடுகள்"),
+    sub:T("7 prinsip rekaan","வடிவமைப்பின் 7 கோட்பாடுகள்"),
+    note:"https://drive.google.com/file/d/1USw4w5Hhrk3qreL8e9J6ZQeJd89oDLzu/view",
+    kind:"acc",
+    items:[
+      {c:"var(--line)", t:T("Imbangan","சமநிலை"),
+       d:T("Susunan unsur seni yang sama berat pada kedua-dua bahagian — simetri dan tidak simetri.",
+           "இரு பக்கங்களிலும் சம எடையுடன் கூறுகளை அமைத்தல் — சமச்சீர் & சமச்சீரற்ற."),
+       tags:[T("Simetri","சமச்சீர்"),T("Tidak Simetri","சமச்சீரற்ற")]},
+      {c:"var(--colour)", t:T("Kontra","எதிர்மறை"),
+       d:T("Wujud apabila unsur seni yang bertentangan digabungkan; ia menimbulkan daya tarikan.",
+           "எதிரெதிரான கூறுகள் இணையும்போது உருவாகி, வேறுபாட்டால் கவர்ச்சி தருகிறது.")},
+      {c:"var(--form)", t:T("Kesatuan","ஒருமைப்பாடு"),
+       d:T("Menyatukan semua unsur supaya karya kelihatan lengkap, teratur dan sempurna.",
+           "எல்லா கூறுகளையும் ஒன்றிணைத்து படைப்பை முழுமையாகவும் ஒழுங்காகவும் ஆக்குதல்.")},
+      {c:"var(--shape)", t:T("Harmoni","இணக்கம்"),
+       d:T("Keadaan aman, tenang dan teratur apabila unsur seni sesuai antara satu sama lain.",
+           "கூறுகள் ஒன்றுக்கொன்று பொருந்தி அமைதியும் இணக்கமும் தரும் நிலை.")},
+      {c:"var(--texture)", t:T("Penegasan","முதன்மைப்படுத்தல்"),
+       d:T("Menonjolkan satu unsur atau objek utama supaya menarik perhatian.",
+           "ஒரு முக்கியக் கூறை முன்னிலைப்படுத்தி கவனத்தை ஈர்த்தல்.")},
+      {c:"var(--space)", t:T("Irama & Pergerakan","தாளமும் இயக்கமும்"),
+       d:T("Kesan pergerakan berulang seperti kesan angin, air dan ombak dalam karya.",
+           "காற்று, நீர், அலை போன்ற தொடர் அசைவின் உணர்வைப் படைப்பில் காட்டுதல்.")},
+      {c:"var(--form)", t:T("Kepelbagaian","பல்வகை"),
+       d:T("Menggabungkan pelbagai gaya, nilai dan idea yang berbeza dalam satu gubahan.",
+           "பல்வேறு பாணி, மதிப்பு, கருத்துகளை ஒரே படைப்பில் இணைத்தல்.")}
+    ]
+  },
+
+  teknik:{
+    theme:"var(--texture)", icon:"🛠️",
+    ttl:T("Teknik","கலை நடவடிக்கை"),
+    sub:T("Aktiviti seni mengikut tahun","ஆண்டு வாரியான கலை நடவடிக்கைகள்"),
+    note:"https://drive.google.com/file/d/11QP7mAxn6BmGdiMiQgpgkK6OsA_T3QAL/view",
+    kind:"year",
+    fields:[
+      {c:"var(--colour)", n:"1", t:T("Menggambar","படம் உருவாக்கம்")},
+      {c:"var(--shape)",  n:"2", t:T("Corak dan Rekaan","கோலம் உருவாக்கம்")},
+      {c:"var(--form)",   n:"3", t:T("Membentuk & Binaan","உருவமைத்தல் & கட்டுதல்")},
+      {c:"var(--texture)",n:"4", t:T("Kraf Tradisional","பாரம்பரிய கைவினை")}
+    ],
+    years:[
+      {y:1, f:[
+        [TECH.capan,TECH.lukisan,TECH.renjisan,TECH.gosokan],
+        [TECH.ikatan,TECH.tiupan],
+        [TECH.mobail,TECH.model,TECH.boneka],
+        [TECH.batik,TECH.perhiasan]]},
+      {y:2, f:[
+        [TECH.catan,TECH.lukisan,TECH.resis,TECH.gosokan],
+        [TECH.cetakan,TECH.lipatan],
+        [TECH.stabail,TECH.topeng],
+        [TECH.permainan,TECH.tembikar]]},
+      {y:3, f:[
+        [TECH.kolaj,TECH.lukisan,TECH.montaj,TECH.gurisan],
+        [TECH.capan,TECH.renjisan],
+        [TECH.mobail,TECH.boneka],
+        [TECH.anyaman,TECH.pertahanan]]},
+      {y:4, f:[
+        [TECH.poster,TECH.mozek,TECH.catan,TECH.cetakan],
+        [TECH.pualaman,TECH.stensilan],
+        [TECH.diorama,TECH.arca],
+        [TECH.ukiran,TECH.domestik]]},
+      {y:5, f:[
+        [T("Kolaj & Gurisan","சேர்ப்பு & கீறல்"),T("Poster & Montaj","சுவரொட்டி & மொந்தாஜ்"),T("Catan & Mozek","ஓவியம் & துண்டு ஒட்டு"),T("Lukisan & Capan","புனையா & பதித்தல்")],
+        [TECH.kolaj,TECH.titisan],
+        [TECH.stabail,TECH.model],
+        [TECH.tekat,TECH.tembikar]]},
+      {y:6, f:[
+        [T("Menggambar + Corak","படம் + கோலம்"),T("Catan + Mobail","ஓவியம் + தொங்காடி"),T("Resis + Corak","மெழுகு + கோலம்"),T("Lukisan + Boneka","புனையா + பொம்மை")],
+        [T("Tiupan / Renjisan / Resis","ஊதுதல் / தெளித்தல் / மெழுகு"),T("Corak + Lipatan","கோலம் + மடித்தல்")],
+        [T("Puaian / Timbulan","புடைச்சிற்பம்"),T("Asemblaj","பொருத்துதல்"),T("Diorama","கதை சொல்லும் கலை")],
+        [T("Anyaman","முடைதல்"),T("Perhiasan Diri","சுய அலங்காரம்"),T("Permainan Tradisional","பாரம்பரிய விளையாட்டு")]]}
+    ]
+  }
+};
+
+/* home tiles order */
+const HOME=[
+  {k:"bidang", c:"var(--colour)"},
+  {k:"unsur",  c:"var(--line)"},
+  {k:"prinsip",c:"var(--form)"},
+  {k:"teknik", c:"var(--texture)"}
+];
+
+/* ---------- state ---------- */
+let lang = (()=>{try{return localStorage.getItem('psvlang')||'ta'}catch(e){return 'ta'}})();
+let route = 'home';
+let curYear = 1;
+
+function tx(o){return o[lang]}
+
+function setLang(l){
+  lang=l;
+  try{localStorage.setItem('psvlang',l)}catch(e){}
+  document.documentElement.lang = l==='ta'?'ta':'ms';
+  document.getElementById('btn-ta').classList.toggle('on',l==='ta');
+  document.getElementById('btn-ms').classList.toggle('on',l==='ms');
+  moveKnob();
+  render();
+}
+function moveKnob(){
+  const knob=document.getElementById('knob');
+  const a=document.getElementById('btn-ta'), b=document.getElementById('btn-ms');
+  const on = lang==='ta'?a:b;
+  knob.style.width = on.offsetWidth+'px';
+  knob.style.transform = `translateX(${on.offsetLeft-4}px)`;
+}
+
+function go(r){route=r;window.scrollTo({top:0,behavior:'smooth'});render();}
+
+/* ---------- renderers ---------- */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+
+function homeView(){
+  const t=UI.hero_title[lang];
+  const feats=UI.feats[lang].map(f=>`<span class="chip">${f}</span>`).join('');
+  const tiles=HOME.map(h=>{
+    const s=SECTIONS[h.k];
+    const count = s.kind==='year'? s.years.length : s.items.length;
+    return `<button class="tile" style="--tc:${h.c}" onclick="go('${h.k}')">
+      <span class="swash"></span>
+      <span class="count">${count}</span>
+      <span class="ico">${s.icon}</span>
+      <h3>${esc(tx(s.ttl))}</h3>
+      <p>${esc(tx(s.sub))}</p>
+    </button>`;
+  }).join('');
+  return `<div class="view">
+    <section class="hero">
+      <span class="paint" style="width:130px;height:130px;background:var(--colour);left:6%;top:8%"></span>
+      <span class="paint" style="width:90px;height:90px;background:var(--line);right:10%;top:14%;animation-delay:1.5s"></span>
+      <span class="paint" style="width:70px;height:70px;background:var(--form);left:18%;bottom:6%;animation-delay:.8s"></span>
+      <span class="paint" style="width:100px;height:100px;background:var(--shape);right:16%;bottom:2%;animation-delay:2.2s"></span>
+      <h1>${esc(t[0])}<span class="pop">${esc(t[1])}</span>${esc(t[2])}</h1>
+      <p class="tag">${esc(UI.hero_tag[lang])}</p>
+      <div class="feat">${feats}</div>
+    </section>
+    <div class="grid">${tiles}</div>
+  </div>`;
+}
+
+function chip(o){return `<span class="tag">${esc(tx(o))}${o[lang==='ta'?'ms':'ta']?`<small>${esc(o[lang==='ta'?'ms':'ta'])}</small>`:''}</span>`}
+
+function secHead(s){
+  return `<button class="back" onclick="go('home')">‹ ${esc(tx(UI.back))}</button>
+    <div class="sec-head">
+      <span class="ico">${s.icon}</span>
+      <div><h2>${esc(tx(s.ttl))}</h2><div class="sub">${esc(tx(s.sub))}</div></div>
+    </div>
+    <div class="brush"></div>`;
+}
+
+function accView(key){
+  const s=SECTIONS[key];
+  document.documentElement.style.setProperty('--theme',s.theme);
+  const items=s.items.map((it,i)=>{
+    const tags = it.tags? `<div class="tags">${it.tags.map(chip).join('')}</div>`:'';
+    const desc = it.d? `<p class="desc">${esc(tx(it.d))}</p>`:'';
+    const sub  = it.s? `<small>${esc(tx(it.s))}</small>`:'';
+    return `<div class="acc" style="--ac:${it.c}">
+      <button aria-expanded="false" onclick="toggleAcc(this)">
+        <span class="num">${i+1}</span>
+        <span class="ttl"><b>${esc(tx(it.t))}</b>${sub}</span>
+        <span class="arw">▾</span>
+      </button>
+      <div class="body"><div class="body-in">${desc}${tags}</div></div>
+    </div>`;
+  }).join('');
+  return `<div class="view">${secHead(s)}${items}
+    <a class="notes" href="${s.note}" target="_blank" rel="noopener">📄 ${esc(tx(UI.notes))}</a></div>`;
+}
+
+function yearView(){
+  const s=SECTIONS.teknik;
+  document.documentElement.style.setProperty('--theme',s.theme);
+  const tabs=s.years.map(y=>`<button class="year ${y.y===curYear?'on':''}" onclick="setYear(${y.y})">${esc(tx(UI.year))} ${y.y}</button>`).join('');
+  const yr=s.years.find(y=>y.y===curYear);
+  const fields=s.fields.map((fd,i)=>{
+    const acts=yr.f[i]||[];
+    const chips=acts.map(chip).join('');
+    return `<div class="field" style="--fc:${fd.c}">
+      <h4><span class="dot">${fd.n}</span>${esc(tx(fd.t))}</h4>
+      <div class="fsub">${lang==='ta'?'துறை':'Bidang'} ${fd.n}</div>
+      <div class="tags">${chips}</div>
+    </div>`;
+  }).join('');
+  return `<div class="view">${secHead(s)}
+    <div class="years">${tabs}</div>${fields}
+    <a class="notes" href="${s.note}" target="_blank" rel="noopener">📄 ${esc(tx(UI.notes))}</a></div>`;
+}
+
+function setYear(y){curYear=y;render();}
+
+function toggleAcc(btn){
+  const acc=btn.parentElement, body=acc.querySelector('.body'), open=acc.classList.toggle('open');
+  btn.setAttribute('aria-expanded',open);
+  body.style.maxHeight = open? body.scrollHeight+40+'px' : 0;
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(route==='home') app.innerHTML=homeView();
+  else if(route==='teknik') app.innerHTML=yearView();
+  else app.innerHTML=accView(route);
+  document.getElementById('foot').textContent=tx(UI.foot);
+}
+
+/* init */
+window.addEventListener('load',()=>{moveKnob();setLang(lang);});
+window.addEventListener('resize',moveKnob);
+render();
+</script>
+</body>
+</html>
