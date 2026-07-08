@@ -776,7 +776,28 @@
           transition: none !important;
         }
       }
-    </style>
+    
+      /* ---- Music player (floating) ---- */
+      .music{position:fixed;right:18px;bottom:18px;z-index:60;display:flex;align-items:center;gap:9px;border:none;cursor:pointer;
+        background:linear-gradient(135deg,var(--colour),var(--texture));color:#fff;border-radius:999px;padding:12px 18px 12px 15px;
+        box-shadow:0 10px 26px rgba(44,37,64,.28);font-family:"Baloo Thambi 2",sans-serif;font-weight:700;font-size:15px;
+        transition:transform .18s,box-shadow .18s}
+      .music:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(44,37,64,.34)}
+      .music:active{transform:translateY(-1px)}
+      .music .m-ico{width:22px;height:22px;display:grid;place-items:center}
+      .music .m-ico svg{width:20px;height:20px;fill:#fff;display:block}
+      .music .m-eq{display:none;align-items:flex-end;gap:3px;height:18px;width:20px}
+      .music .m-eq i{width:4px;background:rgba(255,255,255,.95);border-radius:2px;height:40%;animation:eqb .9s ease-in-out infinite}
+      .music .m-eq i:nth-child(2){animation-delay:.3s}
+      .music .m-eq i:nth-child(3){animation-delay:.6s}
+      @keyframes eqb{0%,100%{height:28%}50%{height:100%}}
+      .music.playing .m-eq{display:flex}
+      .music.paused{animation:mpulse 2.6s ease-in-out infinite}
+      @keyframes mpulse{0%,100%{box-shadow:0 10px 26px rgba(44,37,64,.28)}50%{box-shadow:0 12px 30px rgba(230,73,128,.55)}}
+      #foot{padding-bottom:96px}
+      @media(max-width:560px){ .music{right:14px;bottom:14px;padding:13px 15px} .music .m-label{display:none} }
+      @media(prefers-reduced-motion:reduce){ .music.paused{animation:none} .music .m-eq i{animation:none;height:65%} }
+</style>
   </head>
   <body>
     <header>
@@ -800,6 +821,12 @@
     <main id="app"></main>
 
     <footer id="foot"></footer>
+
+    <button id="musicBtn" class="music paused" aria-label="Main muzik" aria-pressed="false" onclick="toggleMusic()">
+      <span class="m-ico" id="mIco"></span>
+      <span class="m-label" id="mLabel">Muzik</span>
+      <span class="m-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
 
     <script>
       /* ============================================================
@@ -1489,6 +1516,99 @@
       });
       window.addEventListener("resize", moveKnob);
       render();
+    </script>
+  
+    <script>
+    /* ---- Kids-friendly background music: Web Audio API, no external files ----
+       Tries to AUTOPLAY on load. Browsers block audio before a user gesture, so
+       if blocked we start on the first tap/click/key/scroll anywhere on the page. */
+    (function(){
+      const BPM=112, beat=60/BPM, LOOP=32;
+      const melody=[[76,1],[79,1],[84,2],[86,1],[84,1],[81,2],[79,1],[81,1],[79,1],[76,1],[72,2],[null,2],
+                    [77,1],[81,1],[79,2],[76,1],[79,1],[84,2],[81,1],[79,1],[77,1],[74,1],[72,2],[null,2]];
+      const bass=[[48,2],[55,2],[45,2],[52,2],[43,2],[50,2],[48,2],[55,2],[41,2],[48,2],[48,2],[55,2],[43,2],[50,2],[48,4]];
+      const midi=n=>440*Math.pow(2,(n-69)/12);
+      let ctx=null, master=null, timer=null, nextLoop=0, playing=false, intent=false, userPaused=false;
+
+      function note(freq,time,dur,type,vol){
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.type=type; o.frequency.value=freq; o.connect(g); g.connect(master);
+        const a=0.006, end=time+Math.max(dur*0.92,a+0.06);
+        g.gain.setValueAtTime(0.0001,time);
+        g.gain.exponentialRampToValueAtTime(vol,time+a);
+        g.gain.exponentialRampToValueAtTime(0.0001,end);
+        o.start(time); o.stop(end+0.03);
+      }
+      function scheduleLoop(start){
+        let t=start;
+        for(const [n,b] of melody){ const d=b*beat;
+          if(n!==null){ note(midi(n),t,d,'triangle',0.17); note(midi(n+12),t,d*0.7,'sine',0.035); }
+          t+=d; }
+        t=start;
+        for(const [n,b] of bass){ note(midi(n),t,b*beat,'sine',0.11); t+=b*beat; }
+      }
+      function tick(){ if(!ctx) return;
+        while(nextLoop < ctx.currentTime + 0.6){ scheduleLoop(nextLoop); nextLoop += LOOP*beat; } }
+      function ensureTimer(){ if(!timer) timer=setInterval(tick,250); }
+      function clearTimer(){ if(timer){clearInterval(timer);timer=null;} }
+
+      function ensureCtx(){
+        if(ctx) return;
+        const AC=window.AudioContext||window.webkitAudioContext;
+        ctx=new AC();
+        master=ctx.createGain(); master.gain.value=0.5; master.connect(ctx.destination);
+        nextLoop=ctx.currentTime+0.15;
+        ctx.onstatechange=()=>{ playing=(ctx.state==='running'&&intent);
+          if(playing) ensureTimer(); paint(); };
+      }
+
+      function play(){ intent=true; userPaused=false; ensureCtx();
+        if(ctx.resume) ctx.resume(); tick(); ensureTimer();
+        playing=(ctx.state==='running'); paint(); }
+      function pause(){ intent=false; userPaused=true;
+        if(ctx&&ctx.suspend) ctx.suspend(); clearTimer(); playing=false; paint(); }
+
+      /* autoplay: attempt now; if blocked, first interaction resumes it */
+      function autoplay(){ intent=true; userPaused=false; ensureCtx();
+        if(ctx.resume) ctx.resume(); tick(); ensureTimer();
+        playing=(ctx.state==='running'); paint();
+        if(ctx.state!=='running') armGesture();
+      }
+      function armGesture(){
+        const evs=['pointerdown','touchstart','keydown','click','scroll'];
+        const kick=(e)=>{
+          if(e&&e.target&&e.target.closest&&e.target.closest('#musicBtn')) return; // button handles itself
+          if(intent && !userPaused && ctx){ if(ctx.resume) ctx.resume(); tick(); ensureTimer(); }
+          cleanup();
+        };
+        function cleanup(){ evs.forEach(ev=>window.removeEventListener(ev,kick,true)); }
+        evs.forEach(ev=>window.addEventListener(ev,kick,true));
+      }
+
+      const PLAY='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+      const PAUSE='<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';
+      const LBL={playing:{ta:'\u0b87\u0b9a\u0bc8 \u0b87\u0baf\u0b99\u0bcd\u0b95\u0bc1\u0b95\u0bbf\u0bb1\u0ba4\u0bc1',ms:'Muzik dimainkan'},
+                 paused:{ta:'\u0b87\u0b9a\u0bc8',ms:'Muzik'}};
+      const ARIA={play:{ta:'\u0b87\u0b9a\u0bc8\u0baf\u0bc8 \u0b87\u0baf\u0b95\u0bcd\u0b95\u0bc1',ms:'Main muzik'},
+                  pause:{ta:'\u0b87\u0b9a\u0bc8\u0baf\u0bc8 \u0ba8\u0bbf\u0bb1\u0bc1\u0ba4\u0bcd\u0ba4\u0bc1',ms:'Hentikan muzik'}};
+      function curLang(){ try{ return (typeof lang!=='undefined'&&lang)?lang:'ta'; }catch(e){ return 'ta'; } }
+      function paint(){
+        const btn=document.getElementById('musicBtn'); if(!btn) return;
+        const L=curLang();
+        document.getElementById('mIco').innerHTML = playing?PAUSE:PLAY;
+        document.getElementById('mLabel').textContent = playing? LBL.playing[L] : LBL.paused[L];
+        btn.setAttribute('aria-pressed', playing?'true':'false');
+        btn.setAttribute('aria-label', playing?ARIA.pause[L]:ARIA.play[L]);
+        btn.classList.toggle('playing',playing);
+        btn.classList.toggle('paused',!playing);
+      }
+      window.toggleMusic=function(){ playing? pause() : play(); };
+      window.addEventListener('load',()=>{ paint();
+        ['btn-ta','btn-ms'].forEach(id=>{const b=document.getElementById(id); if(b) b.addEventListener('click',()=>setTimeout(paint,0));});
+        autoplay();
+      });
+      document.addEventListener('DOMContentLoaded',paint);
+    })();
     </script>
   </body>
 </html>
